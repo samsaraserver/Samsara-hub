@@ -9,4 +9,4 @@ if ! command -v bun &> /dev/null; then
 fi
 
 echo "Starting Samsara-hub server..."
-bun run server.ts
+bun run Public/server.ts

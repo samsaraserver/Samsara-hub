@@ -9,4 +9,4 @@ if %errorlevel% neq 0 (
 )
 
 echo Starting Samsara-hub server...
-bun run server.ts
+bun run Public/server.ts
