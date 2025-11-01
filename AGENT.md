@@ -29,9 +29,10 @@ All features need to be implemented as the main landing page. The pages of docum
 
 - Runtime: Bun
 - Frontend: HTML
-- Platform: Android server
+- Platform: Android server (NOT PWA)
 - Server: Linux
 - Main entry: server.ts in public folder
+- Must be super light weight it runs on low end linux servers
 
 ### Required Startup Files
 

@@ -40,11 +40,6 @@ const server = Bun.serve({
             });
         }
 
-        if (path === "/manifest.json") {
-            return new Response(await file(`${PUBLIC_DIR}/manifest.json`).text(), {
-                headers: { "Content-Type": "application/json" }
-            });
-        }
 
         if (path === "/api/system/stats") {
             return await handleSystemStats();
