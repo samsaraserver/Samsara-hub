@@ -4,7 +4,6 @@ import { promisify } from "util";
 
 const execAsync = promisify(exec);
 
-const PORT = 3000;
 const PUBLIC_DIR = "./Public";
 
 interface SystemStats {
@@ -22,52 +21,153 @@ interface PackageInfo {
     installed: boolean;
 }
 
-const server = Bun.serve({
-    port: PORT,
-    async fetch(req) {
-        const url = new URL(req.url);
-        const path = url.pathname;
+const STATIC_ASSETS: Record<string, { location: string; type: string }> = {
+    "/Global.css": { location: "./Global.css", type: "text/css" },
+    "/index.js": { location: `${PUBLIC_DIR}/index.js`, type: "application/javascript" },
+    "/WebUi.svg": { location: "./WebUi.svg", type: "image/svg+xml" }
+};
 
-        if (path === "/" || path === "/index.html") {
-            return new Response(await file(`${PUBLIC_DIR}/index.html`).text(), {
-                headers: { "Content-Type": "text/html" }
-            });
-        }
-
-        if (path === "/Global.css") {
-            return new Response(await file("./Global.css").text(), {
-                headers: { "Content-Type": "text/css" }
-            });
-        }
-
-
-        if (path === "/api/system/stats") {
-            return await handleSystemStats();
-        }
-
-        if (path === "/api/system/command" && req.method === "POST") {
-            return await handleSystemCommand(req);
-        }
-
-        if (path === "/api/packages/list") {
-            return await handlePackagesList();
-        }
-
-        if (path === "/api/packages/install" && req.method === "POST") {
-            return await handlePackageInstall(req);
-        }
-
-        if (path === "/api/packages/uninstall" && req.method === "POST") {
-            return await handlePackageUninstall(req);
-        }
-
-        if (path === "/api/services/list") {
-            return await handleServicesList();
-        }
-
-        return new Response("Not Found", { status: 404 });
+function getMimeType(pathname: string): string {
+    if (pathname.endsWith(".css")) {
+        return "text/css";
     }
-});
+    if (pathname.endsWith(".js")) {
+        return "application/javascript";
+    }
+    if (pathname.endsWith(".svg")) {
+        return "image/svg+xml";
+    }
+    if (pathname.endsWith(".html")) {
+        return "text/html";
+    }
+    if (pathname.endsWith(".json")) {
+        return "application/json";
+    }
+    return "application/octet-stream";
+}
+
+function getBasePort(): number {
+    const fromEnv = Bun.env.SAMSARA_PORT ?? Bun.env.PORT;
+    if (fromEnv) {
+        const parsed = Number.parseInt(fromEnv, 10);
+        if (!Number.isNaN(parsed) && parsed > 0 && parsed < 65536) {
+            return parsed;
+        }
+    }
+    return 3000;
+}
+
+function buildPortSequence(): number[] {
+    const base = getBasePort();
+    const attempts = getPortAttemptCount();
+    return Array.from({ length: attempts }, (_, index) => base + index);
+}
+
+function getPortAttemptCount(): number {
+    const fromEnv = Bun.env.SAMSARA_PORT_ATTEMPTS;
+    if (fromEnv) {
+        const parsed = Number.parseInt(fromEnv, 10);
+        if (!Number.isNaN(parsed) && parsed > 0) {
+            return Math.min(parsed, 50);
+        }
+    }
+    return 5;
+}
+
+function isAddressInUse(error: unknown): boolean {
+    if (typeof error !== "object" || error === null) {
+        return false;
+    }
+    if (!("code" in error)) {
+        return false;
+    }
+    const code = (error as { code?: string }).code;
+    return code === "EADDRINUSE";
+}
+
+function startServer(): ReturnType<typeof Bun.serve> {
+    const candidates = buildPortSequence();
+    for (const port of candidates) {
+        try {
+            return Bun.serve({
+                port,
+                async fetch(req) {
+                    const url = new URL(req.url);
+                    const path = url.pathname;
+
+                    if (path === "/" || path === "/index.html") {
+                        return new Response(await file(`${PUBLIC_DIR}/index.html`).text(), {
+                            headers: { "Content-Type": "text/html" }
+                        });
+                    }
+
+                    if (path === "/api/system/stats") {
+                        return await handleSystemStats();
+                    }
+
+                    if (path === "/api/system/command" && req.method === "POST") {
+                        return await handleSystemCommand(req);
+                    }
+
+                    if (path === "/api/packages/list") {
+                        return await handlePackagesList();
+                    }
+
+                    if (path === "/api/packages/install" && req.method === "POST") {
+                        return await handlePackageInstall(req);
+                    }
+
+                    if (path === "/api/packages/uninstall" && req.method === "POST") {
+                        return await handlePackageUninstall(req);
+                    }
+
+                    if (path === "/api/services/list") {
+                        return await handleServicesList();
+                    }
+
+                    const staticAsset = await serveStaticAsset(path);
+                    if (staticAsset) {
+                        return staticAsset;
+                    }
+
+                    return new Response("Not Found", { status: 404 });
+                }
+            });
+        } catch (error) {
+            if (!isAddressInUse(error)) {
+                throw error;
+            }
+        }
+    }
+    throw new Error("All candidate ports are currently in use");
+}
+
+const server = startServer();
+
+async function serveStaticAsset(pathname: string): Promise<Response | null> {
+    const direct = STATIC_ASSETS[pathname];
+    if (direct) {
+        const asset = Bun.file(direct.location);
+        if (await asset.exists()) {
+            return new Response(asset, {
+                headers: { "Content-Type": direct.type }
+            });
+        }
+    }
+
+    if (pathname.includes("..")) {
+        return null;
+    }
+
+    const candidate = Bun.file(`${PUBLIC_DIR}${pathname}`);
+    if (await candidate.exists()) {
+        return new Response(candidate, {
+            headers: { "Content-Type": getMimeType(pathname) }
+        });
+    }
+
+    return null;
+}
 
 async function handleSystemStats(): Promise<Response> {
     try {
@@ -194,7 +294,7 @@ async function getTemperature(): Promise<string> {
     try {
         const { stdout } = await execAsync("cat /sys/class/thermal/thermal_zone0/temp");
         const temp = parseInt(stdout.trim()) / 1000;
-        return `${temp.toFixed(1)}°C`;
+        return `${temp.toFixed(1)}ï¿½C`;
     } catch {
         return "N/A";
     }
@@ -276,4 +376,4 @@ async function getRunningServices(): Promise<string[]> {
     }
 }
 
-console.log(`Server running at http://localhost:${PORT}`);
+console.log(`Server running at http://localhost:${server.port}`);

@@ -8,5 +8,6 @@ if ! command -v bun &> /dev/null; then
     exit 1
 fi
 
-echo "Starting Samsara-hub server..."
-bun run Public/server.ts
+BASE_PORT="${SAMSARA_PORT:-${PORT:-3000}}"
+echo "Starting Samsara-hub server (base port ${BASE_PORT})..."
+SAMSARA_PORT="${BASE_PORT}" bun run Public/server.ts

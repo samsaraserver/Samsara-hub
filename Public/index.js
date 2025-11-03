@@ -54,41 +54,64 @@ function parsePercentage(value) {
 	return Number.parseFloat(match[1]);
 }
 
-// #COMPLETION_DRIVE: Assuming memoryUsage follows "<used>/<total>MB (<percent>%)" structure from /api/system/stats
-// #SUGGEST_VERIFY: Inspect API responses on target hosts to confirm parsing before deployment
 function parseMemoryUsage(value) {
 	if (!value) {
 		return { display: "N/A", percent: 0 };
 	}
-	const primary = value.split("(")[0]?.trim() ?? value;
-	const percentMatch = value.match(/(\d+(?:\.\d+)?)%/);
-	const percent = percentMatch ? Number.parseFloat(percentMatch[1]) : 0;
-	return { display: primary, percent };
+	const trimmed = value.trim();
+	let percent = parsePercentage(trimmed);
+	if (percent === 0) {
+		const ratioMatch = trimmed.match(/(\d+(?:\.\d+)?)\s*[A-Za-z]*\s*\/\s*(\d+(?:\.\d+)?)/);
+		if (ratioMatch) {
+			const used = Number.parseFloat(ratioMatch[1]);
+			const total = Number.parseFloat(ratioMatch[2]);
+			if (!Number.isNaN(used) && !Number.isNaN(total) && total > 0) {
+				percent = Math.min((used / total) * 100, 100);
+			}
+		}
+	}
+	const display = trimmed.includes("(") ? trimmed.split("(")[0].trim() : trimmed;
+	return { display, percent };
 }
 
-// #COMPLETION_DRIVE: Assuming diskUsage includes a "(<percent>%)" substring for utilization reporting
-// #SUGGEST_VERIFY: Capture sample df output via /api/system/stats across supported distributions
 function parseDiskUsage(value) {
 	if (!value) {
 		return { display: "N/A", percent: 0 };
 	}
-	const percentMatch = value.match(/(\d+(?:\.\d+)?)%/);
-	const percent = percentMatch ? Number.parseFloat(percentMatch[1]) : 0;
-	const display = value.split("(")[0]?.trim() ?? value;
+	const trimmed = value.trim();
+	let percent = parsePercentage(trimmed);
+	if (percent === 0) {
+		const ratioMatch = trimmed.match(/(\d+(?:\.\d+)?)\s*[A-Za-z]*\s*\/\s*(\d+(?:\.\d+)?)/);
+		if (ratioMatch) {
+			const used = Number.parseFloat(ratioMatch[1]);
+			const total = Number.parseFloat(ratioMatch[2]);
+			if (!Number.isNaN(used) && !Number.isNaN(total) && total > 0) {
+				percent = Math.min((used / total) * 100, 100);
+			}
+		}
+	}
+	const display = trimmed.includes("(") ? trimmed.split("(")[0].trim() : trimmed;
 	return { display, percent };
 }
 
-// #COMPLETION_DRIVE: Assuming temperature string carries a numeric Celsius value
-// #SUGGEST_VERIFY: Compare parsed temperature against raw sensor readings on device
 function parseTemperature(value) {
 	if (!value) {
 		return { display: "N/A", percent: 0 };
 	}
-	const numeric = Number.parseFloat(value.replace(/[^\d.]/g, ""));
-	if (Number.isNaN(numeric)) {
-		return { display: value, percent: 0 };
+	const raw = value.trim();
+	const numericMatch = raw.match(/-?\d+(?:\.\d+)?/);
+	if (!numericMatch) {
+		return { display: raw, percent: 0 };
 	}
-	return { display: `${numeric.toFixed(1)}°C`, percent: Math.min(numeric, 100) };
+	const reading = Number.parseFloat(numericMatch[0]);
+	if (Number.isNaN(reading)) {
+		return { display: raw, percent: 0 };
+	}
+	const isFahrenheit = /f/i.test(raw) && !/c/i.test(raw);
+	const celsius = isFahrenheit ? ((reading - 32) * 5) / 9 : reading;
+	const display = `${celsius.toFixed(1)}°C`;
+	const percent = Math.max(0, Math.min((celsius / 100) * 100, 100));
+	return { display, percent };
 }
 
 function updateMetrics(stats) {

@@ -3,52 +3,257 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Samsara Hub</title>
+        <title>SamsaraServer Dashboard</title>
         <link rel="stylesheet" href="/Global.css" />
     </head>
     <body>
-        <div class="container">
-            <header>
-                <div class="header-logo">
-                    <div class="logo-placeholder"></div>
-                    <span class="header-title">Your Samsara Server</span>
-                </div>
-                <div class="header-actions">
-                    <button class="btn btn-success">Start</button>
-                    <button class="btn btn-warning">Settings</button>
-                    <button class="btn btn-danger">Stop</button>
-                </div>
-            </header>
-
-            <main>
-                <div class="main-content">
-                    <section class="panel dashboard-cards">
-                        <div class="cards-grid"></div>
-                    </section>
-
-                    <section class="panel monitoring-panel">
-                        <div class="monitoring-content"></div>
-                    </section>
-
-                    <section class="panel package-manager">
-                        <div class="package-grid"></div>
-                    </section>
-                </div>
-
-                <aside class="sidebar">
-                    <div class="panel sidebar-widget">
-                        <div class="widget-display"></div>
+        <header class="header">
+            <div class="header-left">
+                <div class="logo">SamsaraServer</div>
+                <nav class="nav-links">
+                    <a class="nav-link" href="#">Dashboard</a>
+                    <a class="nav-link" href="https://samsaraserver.space/docs" target="_blank" rel="noreferrer">Documentation</a>
+                    <a class="nav-link" href="https://samsaraserver.space/community" target="_blank" rel="noreferrer">Community Forums</a>
+                    <button class="nav-link" data-settings-toggle="open" type="button">Settings</button>
+                </nav>
+            </div>
+            <div class="server-controls">
+                <button class="btn btn-success" data-command="start">Start Server</button>
+                <button class="btn btn-warning" data-command="restart">Restart</button>
+                <button class="btn btn-danger" data-command="stop">Stop Server</button>
+            </div>
+        </header>
+        <main class="main-content">
+            <div class="left-panel">
+                <section class="card" id="overview-card">
+                    <div class="card-header">System Overview</div>
+                    <div class="card-body">
+                        <div class="system-overview">
+                            <article class="metric-card" data-metric="cpu">
+                                <div class="metric-value" data-metric-value="cpu">0%</div>
+                                <div class="metric-label">CPU Usage</div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" data-progress="cpu" style="width: 0%"></div>
+                                </div>
+                            </article>
+                            <article class="metric-card" data-metric="memory">
+                                <div class="metric-value" data-metric-value="memory">0 GB</div>
+                                <div class="metric-label">Memory Used</div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" data-progress="memory" style="width: 0%"></div>
+                                </div>
+                            </article>
+                            <article class="metric-card" data-metric="temperature">
+                                <div class="metric-value" data-metric-value="temperature">0°C</div>
+                                <div class="metric-label">Temperature</div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill warning" data-progress="temperature" style="width: 0%"></div>
+                                </div>
+                            </article>
+                            <article class="metric-card" data-metric="storage">
+                                <div class="metric-value" data-metric-value="storage">0 GB</div>
+                                <div class="metric-label">Storage Used</div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" data-progress="storage" style="width: 0%"></div>
+                                </div>
+                            </article>
+                        </div>
                     </div>
-
-                    <div class="panel sidebar-widget">
-                        <div class="widget-display"></div>
+                </section>
+                <section class="card" id="process-card">
+                    <div class="card-header">Running Processes</div>
+                    <div class="card-body">
+                        <table class="process-table">
+                            <thead>
+                                <tr>
+                                    <th>Process</th>
+                                    <th>PID</th>
+                                    <th>CPU</th>
+                                    <th>Memory</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody data-process-table>
+                                <tr>
+                                    <td>nginx</td>
+                                    <td>1234</td>
+                                    <td>12.5%</td>
+                                    <td>256MB</td>
+                                    <td><span class="status-badge status-active">Active</span></td>
+                                </tr>
+                                <tr>
+                                    <td>jellyfin</td>
+                                    <td>1567</td>
+                                    <td>34.2%</td>
+                                    <td>1.2GB</td>
+                                    <td><span class="status-badge status-active">Active</span></td>
+                                </tr>
+                                <tr>
+                                    <td>ssh</td>
+                                    <td>999</td>
+                                    <td>0.1%</td>
+                                    <td>32MB</td>
+                                    <td><span class="status-badge status-active">Active</span></td>
+                                </tr>
+                                <tr>
+                                    <td>postgresql</td>
+                                    <td>2001</td>
+                                    <td>8.3%</td>
+                                    <td>512MB</td>
+                                    <td><span class="status-badge status-inactive">Stopped</span></td>
+                                </tr>
+                                <tr>
+                                    <td>apache2</td>
+                                    <td>1890</td>
+                                    <td>5.7%</td>
+                                    <td>128MB</td>
+                                    <td><span class="status-badge status-active">Active</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
-
-                    <div class="panel sidebar-widget">
-                        <div class="widget-list"></div>
+                </section>
+                <section class="card" id="packages-card">
+                    <div class="card-header">Community Packages</div>
+                    <div class="card-body">
+                        <div class="package-grid" data-package-grid>
+                            <article class="package-card">
+                                <div class="package-name">Jellyfin Media Server</div>
+                                <div class="package-author">by jellyfin-team</div>
+                                <div class="package-description">Stream your media collection to any device. Perfect for movies, TV shows, and music.</div>
+                                <div class="package-actions">
+                                    <button class="btn btn-success btn-small" data-package-install="Jellyfin Media Server">Install</button>
+                                    <button class="btn btn-outline btn-small" type="button">Info</button>
+                                </div>
+                            </article>
+                            <article class="package-card">
+                                <div class="package-name">Nextcloud File Server</div>
+                                <div class="package-author">by nextcloud</div>
+                                <div class="package-description">Self-hosted file sharing and collaboration platform with advanced features.</div>
+                                <div class="package-actions">
+                                    <button class="btn btn-success btn-small" data-package-install="Nextcloud File Server">Install</button>
+                                    <button class="btn btn-outline btn-small" type="button">Info</button>
+                                </div>
+                            </article>
+                            <article class="package-card">
+                                <div class="package-name">Pi-hole DNS Blocker</div>
+                                <div class="package-author">by pi-hole</div>
+                                <div class="package-description">Network-wide ad blocker that acts as your DNS sinkhole.</div>
+                                <div class="package-actions">
+                                    <button class="btn btn-success btn-small" data-package-install="Pi-hole DNS Blocker">Install</button>
+                                    <button class="btn btn-outline btn-small" type="button">Info</button>
+                                </div>
+                            </article>
+                            <article class="package-card">
+                                <div class="package-name">Home Assistant</div>
+                                <div class="package-author">by home-assistant</div>
+                                <div class="package-description">Open source home automation platform focusing on privacy and local control.</div>
+                                <div class="package-actions">
+                                    <button class="btn btn-success btn-small" data-package-install="Home Assistant">Install</button>
+                                    <button class="btn btn-outline btn-small" type="button">Info</button>
+                                </div>
+                            </article>
+                            <article class="package-card">
+                                <div class="package-name">Gitea Git Server</div>
+                                <div class="package-author">by gitea-team</div>
+                                <div class="package-description">Lightweight self-hosted Git service with web interface and advanced features.</div>
+                                <div class="package-actions">
+                                    <button class="btn btn-success btn-small" data-package-install="Gitea Git Server">Install</button>
+                                    <button class="btn btn-outline btn-small" type="button">Info</button>
+                                </div>
+                            </article>
+                            <article class="package-card">
+                                <div class="package-name">WordPress</div>
+                                <div class="package-author">by wordpress</div>
+                                <div class="package-description">Popular content management system for websites and blogs.</div>
+                                <div class="package-actions">
+                                    <button class="btn btn-success btn-small" data-package-install="WordPress">Install</button>
+                                    <button class="btn btn-outline btn-small" type="button">Info</button>
+                                </div>
+                            </article>
+                        </div>
                     </div>
-                </aside>
-            </main>
-        </div>
+                </section>
+            </div>
+            <aside class="right-panel">
+                <section class="card" id="info-card">
+                    <div class="card-header">System Information</div>
+                    <div class="card-body">
+                        <div class="system-info" data-system-info>
+                            <div class="info-item">
+                                <span class="info-label">Uptime</span>
+                                <span class="info-value" data-info="uptime">--</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Load Average</span>
+                                <span class="info-value" data-info="load">0.00, 0.00, 0.00</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Kernel</span>
+                                <span class="info-value" data-info="kernel">Linux</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Architecture</span>
+                                <span class="info-value" data-info="arch">aarch64</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Network</span>
+                                <span class="info-value" data-info="network">192.168.1.105</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Battery</span>
+                                <span class="info-value" data-info="battery">89% Charging</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">SSH Port</span>
+                                <span class="info-value" data-info="ssh">2222</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Web Port</span>
+                                <span class="info-value" data-info="web">8080</span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                <section class="card" id="logs-card">
+                    <div class="card-header">Recent Logs</div>
+                    <div class="card-body">
+                        <div class="log-container" data-log-container>
+                            <div class="log-line log-info">[2024-08-25 14:23:15] INFO: SamsaraServer started successfully</div>
+                            <div class="log-line log-success">[2024-08-25 14:23:18] SUCCESS: Alpine Linux environment initialized</div>
+                            <div class="log-line log-info">[2024-08-25 14:23:20] INFO: SSH server listening on port 2222</div>
+                            <div class="log-line log-success">[2024-08-25 14:23:22] SUCCESS: Web dashboard started on port 8080</div>
+                            <div class="log-line log-info">[2024-08-25 14:25:10] INFO: Jellyfin media server started</div>
+                            <div class="log-line log-warning">[2024-08-25 14:28:45] WARN: High temperature detected: 72°C</div>
+                            <div class="log-line log-info">[2024-08-25 14:30:12] INFO: Package nginx updated successfully</div>
+                            <div class="log-line log-success">[2024-08-25 14:32:05] SUCCESS: Backup completed</div>
+                            <div class="log-line log-info">[2024-08-25 14:33:18] INFO: New client connected via SSH</div>
+                            <div class="log-line log-info">[2024-08-25 14:35:22] INFO: System health check passed</div>
+                        </div>
+                    </div>
+                </section>
+                <section class="card" id="actions-card">
+                    <div class="card-header">Quick Actions</div>
+                    <div class="card-body">
+                        <div class="quick-actions">
+                            <button class="btn btn-outline" type="button" data-action="view-logs">View Full Logs</button>
+                            <button class="btn btn-outline" type="button" data-action="backup">System Backup</button>
+                            <button class="btn btn-outline" type="button" data-action="update">Update Packages</button>
+                            <button class="btn btn-outline" type="button" data-action="terminal">Terminal Access</button>
+                            <button class="btn btn-outline" type="button" data-action="export">Export Config</button>
+                            <button class="btn btn-outline" type="button" data-action="monitor">Resource Monitor</button>
+                        </div>
+                    </div>
+                </section>
+            </aside>
+        </main>
+        <dialog id="settings-dialog">
+            <form method="dialog">
+                <h2>Settings</h2>
+                <p>Settings interface coming soon.</p>
+                <button class="btn btn-outline" type="submit">Close</button>
+            </form>
+        </dialog>
+        <script type="module" src="/index.js"></script>
     </body>
 </html>
