@@ -79,6 +79,12 @@ function parseDiskUsage(value) {
 		return { display: "N/A", percent: 0 };
 	}
 	const trimmed = value.trim();
+	const percentMatch = trimmed.match(/\((\d+(?:\.\d+)?)%\)/);
+	if (percentMatch) {
+		const percent = Number.parseFloat(percentMatch[1]);
+		const display = trimmed.replace(/\([^)]+\)/, "").trim();
+		return { display, percent: Math.min(percent, 100) };
+	}
 	let percent = parsePercentage(trimmed);
 	if (percent === 0) {
 		const ratioMatch = trimmed.match(/(\d+(?:\.\d+)?)\s*[A-Za-z]*\s*\/\s*(\d+(?:\.\d+)?)/);
@@ -174,7 +180,8 @@ async function sendCommand(command) {
 			body: JSON.stringify({ command })
 		});
 		if (!response.ok) {
-			throw new Error(`Status ${response.status}`);
+			const errorData = await response.json();
+			throw new Error(errorData.error || `Status ${response.status}`);
 		}
 		const result = await response.json();
 		if (result.success) {
@@ -185,21 +192,21 @@ async function sendCommand(command) {
 		}
 	} catch (error) {
 		showNotification(`Command ${command} failed`, "error");
-		console.error(error);
+		console.error("Command error:", error);
 	}
 }
 
 function attachCommandHandlers() {
 	const buttons = document.querySelectorAll('[data-command]');
-	buttons.forEach(button => {
+	for (const button of buttons) {
 		button.addEventListener("click", async () => {
-			const command = button.getAttribute("data-command");
+			const command = button.dataset.command;
 			if (!command) {
 				return;
 			}
 			await sendCommand(command);
 		});
-	});
+	}
 }
 
 function attachSettingsHandler() {
@@ -215,22 +222,22 @@ function attachSettingsHandler() {
 
 function attachQuickActions() {
 	const quickActionButtons = document.querySelectorAll('[data-action]');
-	quickActionButtons.forEach(button => {
+	for (const button of quickActionButtons) {
 		button.addEventListener("click", () => {
-			const action = button.getAttribute("data-action") ?? "action";
-			showNotification(`${action.replace(/-/g, " ")} triggered`, "success");
+			const action = button.dataset.action ?? "action";
+			showNotification(`${action.replaceAll("-", " ")} triggered`, "success");
 		});
-	});
+	}
 }
 
 function attachPackageHandlers() {
 	const packageButtons = document.querySelectorAll('[data-package-install]');
-	packageButtons.forEach(button => {
+	for (const button of packageButtons) {
 		button.addEventListener("click", () => {
-			const name = button.getAttribute("data-package-install") ?? "package";
+			const name = button.dataset.packageInstall ?? "package";
 			showNotification(`${name} queued`, "success");
 		});
-	});
+	}
 }
 
 function initialize() {

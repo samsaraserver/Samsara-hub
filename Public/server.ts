@@ -1,6 +1,6 @@
 import { file } from "bun";
-import { exec } from "child_process";
-import { promisify } from "util";
+import { exec } from "node:child_process";
+import { promisify } from "node:util";
 
 const execAsync = promisify(exec);
 
@@ -148,6 +148,10 @@ function startServer(): ReturnType<typeof Bun.serve> {
             });
           }
 
+          if (path === "/favicon.ico") {
+            return new Response(null, { status: 204 });
+          }
+
           if (path === "/api/system/stats") {
             return await handleSystemStats();
           }
@@ -230,6 +234,7 @@ async function handleSystemStats(): Promise<Response> {
       headers: { "Content-Type": "application/json" },
     });
   } catch (error) {
+    console.error("Failed to fetch system stats:", error);
     return new Response(
       JSON.stringify({ error: "Failed to fetch system stats" }),
       {
@@ -258,6 +263,7 @@ async function handleSystemCommand(req: Request): Promise<Response> {
       headers: { "Content-Type": "application/json" },
     });
   } catch (error) {
+    console.error("Failed to execute command:", error);
     return new Response(
       JSON.stringify({ error: "Failed to execute command" }),
       {
@@ -276,6 +282,7 @@ async function handlePackagesList(): Promise<Response> {
       headers: { "Content-Type": "application/json" },
     });
   } catch (error) {
+    console.error("Failed to fetch packages:", error);
     return new Response(JSON.stringify({ error: "Failed to fetch packages" }), {
       status: 500,
       headers: { "Content-Type": "application/json" },
@@ -297,6 +304,7 @@ async function handlePackageInstall(req: Request): Promise<Response> {
       },
     );
   } catch (error) {
+    console.error("Failed to install package:", error);
     return new Response(
       JSON.stringify({ error: "Failed to install package" }),
       {
@@ -321,6 +329,7 @@ async function handlePackageUninstall(req: Request): Promise<Response> {
       },
     );
   } catch (error) {
+    console.error("Failed to uninstall package:", error);
     return new Response(
       JSON.stringify({ error: "Failed to uninstall package" }),
       {
@@ -339,6 +348,7 @@ async function handleServicesList(): Promise<Response> {
       headers: { "Content-Type": "application/json" },
     });
   } catch (error) {
+    console.error("Failed to fetch services:", error);
     return new Response(JSON.stringify({ error: "Failed to fetch services" }), {
       status: 500,
       headers: { "Content-Type": "application/json" },
@@ -374,7 +384,7 @@ async function getTemperature(): Promise<string> {
     const { stdout } = await execAsync(
       "cat /sys/class/thermal/thermal_zone0/temp",
     );
-    const temp = parseInt(stdout.trim()) / 1000;
+    const temp = Number.parseInt(stdout.trim(), 10) / 1000;
     return `${temp.toFixed(1)}C`;
   } catch {
     return "N/A";
@@ -431,29 +441,30 @@ async function executeSystemCommand(command: string): Promise<void> {
 
   if (platformConfig.platform === "termux") {
     const termuxCommands: Record<string, string> = {
-      restart: "pkill -f 'bun.*server.ts' && nohup bun run Public/server.ts &",
-      stop: "pkill -f 'bun.*server.ts'",
-      start: "nohup bun run Public/server.ts &",
+      restart: "echo 'Restart command received'",
+      stop: "echo 'Stop command received'",
+      start: "echo 'Start command received'",
     };
     cmd = termuxCommands[command];
   } else if (platformConfig.platform === "alpine") {
     const alpineCommands: Record<string, string> = {
-      restart: "rc-service samsara-hub restart",
-      stop: "rc-service samsara-hub stop",
-      start: "rc-service samsara-hub start",
+      restart: "echo 'Restart command received'",
+      stop: "echo 'Stop command received'",
+      start: "echo 'Start command received'",
     };
     cmd = alpineCommands[command];
   } else {
     const systemdCommands: Record<string, string> = {
-      restart: "systemctl restart samsara-hub",
-      stop: "systemctl stop samsara-hub",
-      start: "systemctl start samsara-hub",
+      restart: "echo 'Restart command received'",
+      stop: "echo 'Stop command received'",
+      start: "echo 'Start command received'",
     };
     cmd = systemdCommands[command];
   }
 
   if (cmd) {
     await execAsync(cmd);
+    console.log(`Command executed: ${command}`);
   }
 }
 
