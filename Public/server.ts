@@ -148,6 +148,21 @@ function startServer(): ReturnType<typeof Bun.serve> {
             });
           }
 
+          if (path === "/docs") {
+            return new Response(await file(`${PUBLIC_DIR}/docs.html`).text(), {
+              headers: { "Content-Type": "text/html" },
+            });
+          }
+
+          if (path === "/forums") {
+            return new Response(
+              await file(`${PUBLIC_DIR}/forums.html`).text(),
+              {
+                headers: { "Content-Type": "text/html" },
+              },
+            );
+          }
+
           if (path === "/favicon.ico") {
             return new Response(null, { status: 204 });
           }

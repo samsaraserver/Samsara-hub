@@ -342,6 +342,70 @@ dialog::backdrop {
     background: rgba(13, 17, 23, 0.6);
 }
 
+.content-wrapper {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.content-wrapper h1 {
+    font-size: 2.5rem;
+    margin-bottom: 1.5rem;
+    color: #58a6ff;
+}
+
+.content-wrapper h2 {
+    font-size: 1.8rem;
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+    color: #e6edf3;
+}
+
+.content-wrapper h3 {
+    font-size: 1.4rem;
+    margin-top: 1.5rem;
+    margin-bottom: 0.75rem;
+    color: #e6edf3;
+}
+
+.content-wrapper p {
+    margin-bottom: 1rem;
+    line-height: 1.6;
+    color: #c9d1d9;
+}
+
+.content-wrapper ul,
+.content-wrapper ol {
+    margin-left: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.content-wrapper li {
+    margin-bottom: 0.5rem;
+    color: #c9d1d9;
+}
+
+.content-wrapper code {
+    background: #161b22;
+    padding: 0.2rem 0.4rem;
+    border-radius: 4px;
+    font-family: "Courier New", monospace;
+    font-size: 0.875rem;
+}
+
+.content-wrapper pre {
+    background: #161b22;
+    padding: 1rem;
+    border-radius: 6px;
+    overflow-x: auto;
+    margin-bottom: 1rem;
+}
+
+.content-wrapper pre code {
+    padding: 0;
+    background: none;
+}
+
 @media (max-width: 1200px) {
     .main-content {
         grid-template-columns: 1fr;
