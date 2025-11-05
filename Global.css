@@ -33,6 +33,14 @@ body {
     font-size: 1.5rem;
     font-weight: bold;
     color: #58a6ff;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.logo svg {
+    width: 24px;
+    height: 24px;
 }
 
 .nav-links {
@@ -46,6 +54,11 @@ body {
     padding: 0.5rem 1rem;
     border-radius: 6px;
     transition: background-color 0.2s;
+    background: transparent;
+    border: none;
+    font-size: inherit;
+    font-family: inherit;
+    cursor: pointer;
 }
 
 .nav-link:hover {
