@@ -9,25 +9,18 @@
     <body>
         <header class="header">
             <div class="header-left">
-                <div class="logo">
-                    <svg viewBox="0 0 24 24" fill="none" style="width: 24px; height: 24px;">
-                        <path d="M12 2L2 7L12 12L22 7L12 2Z" fill="#58a6ff"/>
-                        <path d="M2 17L12 22L22 17" stroke="#58a6ff" stroke-width="2"/>
-                        <path d="M2 12L12 17L22 12" stroke="#58a6ff" stroke-width="2"/>
-                    </svg>
-                    <span>SamsaraServer</span>
-                </div>
+                <div class="logo">SamsaraServer</div>
                 <nav class="nav-links">
-                    <a class="nav-link" href="/">Dashboard</a>
-                    <a class="nav-link" href="/docs">Documentation</a>
-                    <a class="nav-link" href="/forums">Community Forums</a>
+                    <a class="nav-link" href="#">Dashboard</a>
+                    <a class="nav-link" href="https://samsaraserver.space/docs" target="_blank" rel="noreferrer">Documentation</a>
+                    <a class="nav-link" href="https://samsaraserver.space/community" target="_blank" rel="noreferrer">Community Forums</a>
+                    <button class="nav-link" data-settings-toggle="open" type="button">Settings</button>
                 </nav>
             </div>
             <div class="server-controls">
                 <button class="btn btn-success" data-command="start">Start Server</button>
                 <button class="btn btn-warning" data-command="restart">Restart</button>
                 <button class="btn btn-danger" data-command="stop">Stop Server</button>
-                <button class="btn btn-outline" data-settings-toggle="open" type="button">Settings</button>
             </div>
         </header>
         <main class="main-content">
